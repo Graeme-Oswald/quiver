@@ -1,9 +1,10 @@
-val CatsVersion = "1.0.0"
+val CatsVersion = "2.13.0"
 
 libraryDependencies ++= Seq(
   "org.typelevel"              %% "cats-free"                 % CatsVersion,
   "org.typelevel"              %% "cats-laws"                 % CatsVersion % "test",
-  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.7"     % "test"
+  "org.scalacheck"             %% "scalacheck"                % "1.19.0"    % "test",
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.18" % "1.3.2"     % "test"
 )
 
-scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+Compile / doc / scalacOptions := Seq("-groups", "-implicits")

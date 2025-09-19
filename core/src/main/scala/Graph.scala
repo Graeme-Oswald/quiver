@@ -443,17 +443,17 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
    * @group foldmaps
    */
   def nmap[C](f: A => C): Graph[N,C,B] =
-    Graph(rep.mapValues { case GrContext(ps, a, ss) => GrContext(ps, f(a), ss) })
+    Graph(rep.view.mapValues { case GrContext(ps, a, ss) => GrContext(ps, f(a), ss) }.iterator.toMap)
 
   /**
    * Map a function over the edge labels in the graph
    * @group foldmaps
    */
   def emap[C](f: B => C): Graph[N,A,C] =
-    Graph(rep.mapValues {
+    Graph(rep.view.mapValues {
       case GrContext(ps, a, ss) =>
-        GrContext(ps mapValues (_ map f), a, ss mapValues (_ map f))
-    })
+        GrContext(ps.view.mapValues (_ map f).iterator.toMap, a, ss.view.mapValues (_ map f).iterator.toMap)
+    }.iterator.toMap)
 
   /**
    * Map over the unique node identifiers in the graph
@@ -721,7 +721,7 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
       case Decomp(Some(c), g) =>
         val (xs, _) = g.xdfWith(d(c), d, f)
         val (ys, g3) = g.xdfWith(vs.tail, d, f)
-        (Node(f(c), xs.toStream) +: ys, g3)
+        (Node(f(c), xs.to(LazyList)) +: ys, g3)
     }
 
   import scala.collection.immutable.Queue
@@ -737,7 +737,7 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
       val (v, qp) = q.dequeue
       decomp(v) match {
         case Decomp(Some(c), g) =>
-          f(c) +: g.bfsnInternal(f, qp enqueue c.successors)
+          f(c) +: g.bfsnInternal(f, qp enqueueAll c.successors)
         case Decomp(None, g) =>
           g.bfsnInternal(f, qp)
       }
@@ -818,7 +818,7 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
       val (Edge(u,v), qp) = q.dequeue
       decomp(v) match {
         case Decomp(Some(c), g) =>
-          Edge(u,v) +: g.bfenInternal(qp.enqueue(c.outEdges.map(_.edge)))
+          Edge(u,v) +: g.bfenInternal(qp.enqueueAll(c.outEdges.map(_.edge)))
         case Decomp(None, g) =>
           g.bfenInternal(qp)
       }
@@ -838,12 +838,12 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
    * @group bfs
    */
   def bf(q: Queue[Path[N]]): RTree[N] =
-    if (q.isEmpty || isEmpty) Stream()
+    if (q.isEmpty || isEmpty) LazyList()
     else {
       val (p, qp) = q.dequeue
-      if (p.isEmpty) Stream(p)
+      if (p.isEmpty) LazyList(p)
       else decomp(p.head) match {
-        case Decomp(Some(c), g) => p #:: g.bf(qp.enqueue(c.successors.map(_ +: p)))
+        case Decomp(Some(c), g) => p #:: g.bf(qp.enqueueAll(c.successors.map(_ +: p)))
         case Decomp(None, g) => g bf qp
       }
     }
@@ -868,11 +868,11 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
    * @group bfs
    */
   def lbf(q: Queue[LPath[N,B]]): LRTree[N,B] =
-    if (q.isEmpty || isEmpty) Stream()
+    if (q.isEmpty || isEmpty) LazyList()
     else {
       val (p, qp) = q.dequeue
       decomp(p._1) match {
-        case Decomp(Some(c), g) => p #:: g.lbf(qp.enqueue(c.outs.map(nn => (nn._2, (p._1, nn._1) +: p._2))))
+        case Decomp(Some(c), g) => p #:: g.lbf(qp.enqueueAll(c.outs.map(nn => (nn._2, (p._1, nn._1) +: p._2))))
         case Decomp(None, g) => g lbf qp
       }
     }
@@ -883,7 +883,7 @@ case class Graph[N,A,B](rep: GraphRep[N,A,B]) {
    */
   def lbft(v: N): LRTree[N,B] = {
     val out = outEdges(v)
-    if (out.isEmpty) Stream((v, Vector.empty))
+    if (out.isEmpty) LazyList((v, Vector.empty))
     else {
       val LEdge(vp, _, l) = out.head
       lbf(Queue((v, Vector.empty), (vp, Vector((v, l)))))
