@@ -3,10 +3,9 @@ Global / organization := "io.verizon.quiver"
 
 Global / scalaVersion := crossScalaVersions.value.head
 
-//Global / crossScalaVersions := Seq("2.13.16", "2.12.4")
-Global / crossScalaVersions := Seq("2.13.16")
+Global / crossScalaVersions := Seq("2.13.16", "2.12.20")
 
-scalacOptions in (Compile,doc) := Seq("-groups", "-implicits", "-nowarn", "--verbose")
+scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
 
 lazy val quiver = project.in(file(".")).aggregate(core,codecs,docs)
 
