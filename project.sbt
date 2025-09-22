@@ -23,10 +23,10 @@ lazy val quiver = project.in(file("."))
   .aggregate(core,codecs,docs)
   .settings(publishSettings: _*)
 
-lazy val core = project
+lazy val core = project.settings(publishSettings: _*)
 
-lazy val docs = project.dependsOn(core, codecs)
+lazy val docs = project.dependsOn(core, codecs).settings(publishSettings: _*)
 
-lazy val codecs = project.dependsOn(core % "test->test;compile->compile")
+lazy val codecs = project.dependsOn(core % "test->test;compile->compile").settings(publishSettings: _*)
 
 //enablePlugins(DisablePublishingPlugin)
