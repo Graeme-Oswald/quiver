@@ -2,7 +2,7 @@ Global / organization := "io.verizon.quiver"
 
 Global / scalaVersion := crossScalaVersions.value.head
 
-Global / crossScalaVersions := Seq("2.13.16", "2.12.20")
+Global / crossScalaVersions := Seq("2.13.15", "2.12.18")
 
 lazy val publishSettings = Seq(
   credentials += Credentials("Sonatype Nexus Repository Manager", "nexus-proxy.lighthouse.jhc.uk", "dev", "jhcjhc"),
@@ -17,7 +17,7 @@ lazy val publishSettings = Seq(
   }
 )
 
-scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+Compile / doc / scalacOptions:= Seq("-groups", "-implicits")
 
 lazy val quiver = project.in(file("."))
   .aggregate(core,codecs,docs)
