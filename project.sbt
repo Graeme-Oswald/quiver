@@ -1,18 +1,32 @@
+Global / organization := "io.verizon.quiver"
 
-organization in Global := "io.verizon.quiver"
+Global / scalaVersion := crossScalaVersions.value.head
 
-scalaVersion in Global := crossScalaVersions.value.head
+Global / crossScalaVersions := Seq("2.13.15", "2.12.18")
 
-crossScalaVersions in Global := Seq("2.12.4", "2.11.12", "2.10.7")
+lazy val publishSettings = Seq(
+  credentials += Credentials("Sonatype Nexus Repository Manager", "nexus-proxy.lighthouse.jhc.uk", "dev", "jhcjhc"),
 
-scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+  publishTo := {
+    val nexus = "https://nexus-proxy.lighthouse.jhc.uk/nexus/content/repositories/"
 
-lazy val quiver = project.in(file(".")).aggregate(core,codecs,docs)
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "snapshots")
+    else
+      Some("releases" at nexus + "releases")
+  }
+)
 
-lazy val core = project
+Compile / doc / scalacOptions:= Seq("-groups", "-implicits")
 
-lazy val docs = project.dependsOn(core, codecs)
+lazy val quiver = project.in(file("."))
+  .aggregate(core,codecs,docs)
+  .settings(publishSettings: _*)
 
-lazy val codecs = project.dependsOn(core % "test->test;compile->compile")
+lazy val core = project.settings(publishSettings: _*)
 
-enablePlugins(DisablePublishingPlugin)
+lazy val docs = project.dependsOn(core, codecs).settings(publishSettings: _*)
+
+lazy val codecs = project.dependsOn(core % "test->test;compile->compile").settings(publishSettings: _*)
+
+//enablePlugins(DisablePublishingPlugin)

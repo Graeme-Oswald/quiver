@@ -24,7 +24,7 @@ import scodec.Attempt
 object GraphCodecsTest extends Properties("codecs"){
   import GraphGen.{arbitraryNode,arbitraryEdge,arbitraryGraph}
 
-  implicit val uint8 = codecs.int32
+  implicit val uint8 : scodec.Codec[Int] = codecs.int32
 
   def roundTrip[A](typeName: String)(implicit ca: scodec.Codec[A], aa: Arbitrary[A]): Unit = {
     val _ = property(s"binary encoding round trip - $typeName") = {

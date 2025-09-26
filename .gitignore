@@ -35,3 +35,4 @@ bin
 .ivy2
 gpg.sbt
 
+.bsp/

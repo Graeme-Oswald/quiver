@@ -1,16 +1,14 @@
 package verizon.build
 
 import sbt._, Keys._
-import xerial.sbt.Sonatype.autoImport.sonatypeProfileName
+//import xerial.sbt.Sonatype.autoImport.sonatypeProfileName
 
 object CentralRequirementsPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
-  override def requires = RigPlugin
-
   override lazy val projectSettings = Seq(
-    sonatypeProfileName := "io.verizon",
+    //sonatypeProfileName := "io.verizon",
     pomExtra in Global := {
       <developers>
         <developer>
