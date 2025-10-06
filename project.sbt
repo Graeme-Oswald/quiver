@@ -2,7 +2,7 @@ Global / organization := "io.verizon.quiver"
 
 Global / scalaVersion := crossScalaVersions.value.head
 
-Global / crossScalaVersions := Seq("2.13.15", "2.12.18")
+Global / crossScalaVersions := Seq("2.13.16", "2.12.15")
 
 lazy val publishSettings = Seq(
   credentials += Credentials("Sonatype Nexus Repository Manager", "nexus-proxy.lighthouse.jhc.uk", "dev", "jhcjhc"),
